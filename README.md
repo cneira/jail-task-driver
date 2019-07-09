@@ -18,7 +18,8 @@ Requirements
 Parameters
 -----------
 Parameters used by the driver support most of JAIL(8) functionality,names closely match the ones in 
-JAIL(8).
+JAIL(8)  
+.
 [Parameters documentation ](https://github.com/cneira/jail-task-driver/blob/master/Parameters.md)  
 
 Examples 
@@ -88,6 +89,7 @@ job "vnet-example" {
 ```
 
 ## Support
+
 It's also possible to support the project on [Patreon](https://www.patreon.com/neirac)
 
 
