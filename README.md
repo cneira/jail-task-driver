@@ -17,7 +17,7 @@ Requirements
 
 Parameters
 -----------
-Parameters used by the driver support most of JAIL(8) functionality,names closely match the ones in 
+Parameters used by the driver support most of JAIL(8) functionality, parameter names closely match the ones in 
 JAIL(8)  
 .
 [Parameters documentation ](https://github.com/cneira/jail-task-driver/blob/master/Parameters.md)  
@@ -44,6 +44,7 @@ job "test" {
       config {
         Path    = "/zroot/iocage/jails/myjail/root"
 	Persist  = true
+	Ip4_addr = "192.168.1.102"
       }
     }
   }
