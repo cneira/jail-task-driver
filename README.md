@@ -88,6 +88,8 @@ job "vnet-example" {
   }
 }
 ```
+##  Demo
+[![asciicast](https://asciinema.org/a/256519.svg)](https://asciinema.org/a/256519)
 
 ## Support
 
