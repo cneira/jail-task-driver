@@ -17,7 +17,8 @@ Requirements
 Installation
 ------------
 
-Installation is pretty simple, install(and compile) the jail-task-driver binary and put it in [plugin_dir](https://www.nomadproject.io/docs/configuration/index.html#plugin_dir) and then add a `plugin "jail-task-driver" {}` line in your nomad config file.
+Install(and compile) the jail-task-driver binary and put it in [plugin_dir](https://www.nomadproject.io/docs/configuration/index.html#plugin_dir) and then add a `plugin "jail-task-driver" {}` line in your nomad config file.
+
 
 ```shell
 go get github.com/cneira/jail-task-driver
@@ -122,6 +123,8 @@ It's also possible to support the project on [Patreon](https://www.patreon.com/n
 
 - Lucas, Michael W. FreeBSD Mastery: Jails (IT Mastery Book 15). 
 - [FreeBSD HandBook](https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/)
+- [RCTL(8)](https://www.freebsd.org/cgi/man.cgi?query=rctl&sektion=8)
+
 
  TODO:
 -------
