@@ -49,6 +49,7 @@ Examples
 ---------
 
 Basic jail 
+---------
 
 ```hcl
 job "test" {
@@ -74,6 +75,7 @@ job "test" {
 }
 ```
 Vnet jail example 
+-----------------
 
 ```hcl
 job "vnet-example" {
@@ -104,11 +106,39 @@ job "vnet-example" {
 	Exec_consolelog ="/var/tmp/vnet-example"
 	Vnet = true
 	Vnet_nic = "e0b_loghost"
-	Exec_prestart = "/usr/share/examples/jails/jib addm loghost jailether"
+	Exec_prestart = "/usr/share/examples/jails/jib addm loghost em1"
 	Exec_poststop = "/usr/share/examples/jails/jib destroy loghost "
       }
     }
   }
+}
+```
+Setting resource limits
+----------------------
+```
+job "rctl-test" {
+  datacenters = ["dc1"]
+  type        = "service"
+
+  group "test" {
+    restart {
+      attempts = 0
+      mode     = "fail"
+    }
+
+    task "test01" {
+      driver = "jail-task-driver"
+
+      config {
+        Path    = "/zroot/iocage/jails/myjail/root"
+	Persist  = true
+	Ip4_addr = "192.168.1.102"
+	Rctl =  {
+		Vmemoryuse = 1200000
+	}
+    }
+  }
+}
 }
 ```
 ##  Demo
