@@ -115,7 +115,8 @@ job "vnet-example" {
 ```
 Setting resource limits
 ----------------------
-```
+```hcl
+
 job "rctl-test" {
   datacenters = ["dc1"]
   type        = "service"

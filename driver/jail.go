@@ -83,13 +83,13 @@ func Jailrctl(jname string, params map[string]uint) error {
 	args := make([]string, 0)
 	args = append(args, "-a")
 	for k, v := range params {
-		args = append(args, "jail:"+jname+k+ fmt.Sprintf("%d",v))
+		args = append(args, "jail:"+jname+k+fmt.Sprintf("%d", v))
 		out, err := exec.Command("rctl", args...).CombinedOutput()
 		if err != nil {
 			return fmt.Errorf("applying rctl error args=%+v err=%s out=%s", args, err, string(out))
 		}
 	}
-	return nil 
+	return nil
 }
 
 func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskConfig) (int32, error) {
@@ -99,12 +99,11 @@ func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskCon
 	jailparams["name"] = fmt.Sprintf("%s-%s", cfg.Name, cfg.AllocID)
 	jailparams["host.hostname"] = fmt.Sprintf("%s-%s", cfg.Name, cfg.AllocID)
 
-
-  if len(taskConfig.Path) > 0 {
-     jailparams["path"] = taskConfig.Path
-  } else {
-     jailparams["path"] = cfg.AllocDir
-  }
+	if len(taskConfig.Path) > 0 {
+		jailparams["path"] = taskConfig.Path
+	} else {
+		jailparams["path"] = cfg.AllocDir
+	}
 
 	if len(taskConfig.Jid) > 1 {
 		jailparams["jid"] = taskConfig.Jid
