@@ -432,6 +432,11 @@ Jail resource control parameters
 --------------------------------
 This is a verbatim copy for RCTL(8) parameters but modified for naming convention
 used in jail-task-driver, the rctl action is always deny for these parameters.
+RACCT must be enabled first 
+   
+```
+# echo kern.racct.enable=1 >> /boot/loader.conf
+```
   
    
 
