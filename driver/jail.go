@@ -85,7 +85,12 @@ func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskCon
 
 	jailparams["name"] = fmt.Sprintf("%s-%s", cfg.Name, cfg.AllocID)
 	jailparams["host.hostname"] = fmt.Sprintf("%s-%s", cfg.Name, cfg.AllocID)
-	jailparams["path"] = taskConfig.Path
+
+	if len(taskConfig.Path) > 0 {
+		jailparams["path"] = taskConfig.Path
+	} else {
+		jailparams["path"] = cfg.AllocDir
+	}
 
 	if len(taskConfig.Jid) > 1 {
 		jailparams["jid"] = taskConfig.Jid
