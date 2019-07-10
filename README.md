@@ -14,6 +14,27 @@ Requirements
 - [FreeBSD 12.0-RELEASE](https://www.freebsd.org/where.html) *Should work with 11*
 - [Consul](https://releases.hashicorp.com/consul/1.5.2/consul_1.5.2_freebsd_amd64.zip)
 
+Installation
+------------
+
+Installation is pretty simple, install(and compile) the jail-task-driver binary and put it in [plugin_dir](https://www.nomadproject.io/docs/configuration/index.html#plugin_dir) and then add a `plugin "jail-task-driver" {}` line in your nomad config file.
+
+```shell
+go get github.com/cneira/jail-task-driver
+cp $GOPATH/bin/jail-task-driver YOURPLUGINDIR
+```
+
+Then in your nomad config file, set
+```hcl
+plugin "jail-task-driver" {}
+```
+
+In developer/test mode(`nomad agent -dev`) , plugin_dir is unset it seems, so you will need to mkdir plugins and then copy the jail-task-driver binary to plugins and add a `plugins_dir = "path/to/plugins"` to the above config file.
+then you can run it like:
+
+`nomad agent -dev -config nomad.config`
+
+For more details see the nomad [docs](https://www.nomadproject.io/docs/configuration/plugin.html).
 
 Parameters
 -----------
