@@ -15,7 +15,6 @@ job "test" {
         Path    = "/zroot/iocage/jails/myjail/root"
 	Persist  = true
 	Ip4_addr = "192.168.1.102"
-      }
     }
   }
 }
