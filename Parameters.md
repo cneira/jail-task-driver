@@ -2,22 +2,26 @@ Jail creation parameters
 -----------------------
 This is a verbatim copy for JAIL(8) parameters but modified for naming convention
 used in jail-task-driver
+```
 
 
 **Jid**     The jail identifier.  This will be assigned automatically to a
             new jail (or can be explicitly set), and can be used to identify
 e the jail, either by jail or from jexec(8), are run
-is directory.If this parameter is omitted then it will
-	     use nomad's allocation directory as default value.
 
-              ** list of IPv4** addresses assigned to the jail.  If this is set,
+*Path*       The directory which is to be the root of the jail. Any commands 
+	     run inside the jail,either by jail or jexec(8), are run from this
+	     directory.  If this parameter is omitted then it will use nomad's 
+	     allocation directory as default value.
+**Ip4_addr**
+             A list of IPv4 addresses assigned to the jail.  If this is set,
              the jail is restricted to using only these addresses.  Any
               attempts to use other addresses fail, and attempts to use
               wildcard addresses silently use the jailed address instead.  For
              IPv4 the first address given will be used as the source address
              when source address selection on unbound sockets cannot find a
              better match.  It is only possible to start multiple jails with
-**the same IP addre**ss if none of the jails has more than this
+	     the same IP address if none of the jails has more than this
              single overlapping IP address assigned to itself.
 
 **Ip4_saddrsel**
@@ -455,3 +459,4 @@ used in jail-task-driver, the rctl action is always deny for these parameters.
 **Writebps**		   filesystem writes, in bytes per second
 **Readiops**	           filesystem reads, in	operations per second
 **Writeiops**	   	   filesystem writes, in operations per	second
+```
