@@ -52,6 +52,7 @@ func isparamboolean(category string) bool {
 		"exec.system_jail_user",
 		"exec.clean",
 		"vnet",
+		"mount.devfs",
 		"persist":
 		return true
 	}
@@ -70,8 +71,10 @@ func Jailcmd(params map[string]string) error {
 			args = append(args, param)
 		}
 	}
-	if err := exec.Command("jail", args...).Run(); err != nil {
-		return fmt.Errorf("Failed creating jail args=%+v params=%+v", args, params)
+	out, err := exec.Command("jail", args...).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("Jailcmd error args=%+v err=%s out=%s", args, err, string(out))
+
 	}
 	return nil
 }
@@ -138,11 +141,15 @@ func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskCon
 	if taskConfig.Enforce_statfs > 0 {
 		jailparams["enforce_statfs"] = fmt.Sprintf("%d", taskConfig.Enforce_statfs)
 	}
+	//  A new jail must have either the persist parameter or exec.start or
+	//  command pseudo-parameter set.
 
-	if taskConfig.Persist == true {
+	if len(taskConfig.Exec_start) > 1 {
+		jailparams["exec.start"] = taskConfig.Exec_start
+	} else if len(taskConfig.Command) > 1 {
+		jailparams["command"] = taskConfig.Command
+	} else if taskConfig.Persist == true {
 		jailparams["persist"] = "true"
-	} else {
-		jailparams["nopersist"] = "true"
 	}
 
 	if len(taskConfig.Osreldate) > 1 {
@@ -233,31 +240,27 @@ func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskCon
 	}
 
 	if len(taskConfig.Exec_prestart) > 1 {
-		jailparams["exec.prestart"] = "\"" + taskConfig.Exec_prestart + "\""
+		jailparams["exec.prestart"] = taskConfig.Exec_prestart
 	}
 
 	if len(taskConfig.Exec_prestop) > 1 {
-		jailparams["exec.prestop"] = "\"" + taskConfig.Exec_prestop + "\""
+		jailparams["exec.prestop"] = taskConfig.Exec_prestop
 	}
 
 	if len(taskConfig.Exec_created) > 1 {
 		jailparams["exec.created"] = taskConfig.Exec_created
 	}
 
-	if len(taskConfig.Exec_start) > 1 {
-		jailparams["exec.start"] = "\"" + taskConfig.Exec_start + "\""
-	}
-
 	if len(taskConfig.Exec_poststart) > 1 {
-		jailparams["exec.poststart"] = "\"" + taskConfig.Exec_poststart + "\""
+		jailparams["exec.poststart"] = taskConfig.Exec_poststart
 	}
 
 	if len(taskConfig.Exec_stop) > 1 {
-		jailparams["exec.stop"] = "\"" + taskConfig.Exec_stop + "\""
+		jailparams["exec.stop"] = taskConfig.Exec_stop
 	}
 
 	if len(taskConfig.Exec_poststop) > 1 {
-		jailparams["exec.poststop"] = "\"" + taskConfig.Exec_poststop + "\""
+		jailparams["exec.poststop"] = taskConfig.Exec_poststop
 	}
 
 	if taskConfig.Exec_clean {
@@ -294,10 +297,6 @@ func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskCon
 
 	if len(taskConfig.Ip_hostname) > 1 {
 		jailparams["ip_hostname"] = taskConfig.Ip_hostname
-	}
-
-	if len(taskConfig.Command) > 1 {
-		jailparams["command"] = taskConfig.Command
 	}
 
 	if taskConfig.Mount {

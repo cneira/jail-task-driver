@@ -220,7 +220,7 @@ type TaskConfig struct {
 	Exec_fib              string `codec:"Exec_fib"`
 	Stop_timeout          uint   `codec:"Stop_timeout"`
 	Nic                   string `codec:"Nic"`
-	Vnet_nic              string `codec:"vnet_nic"`
+	Vnet_nic              string `codec:"Vnet_nic"`
 	Ip_hostname           string `codec:"Ip_hostname"`
 	Mount                 bool   `codec:"Mount"`
 	Mount_fstab           string `codec:"Mount_fstab"`
