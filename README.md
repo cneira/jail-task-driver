@@ -180,7 +180,7 @@ It's also possible to support the project on [Patreon](https://www.patreon.com/n
 
 ## References
 
-- Lucas, Michael W. FreeBSD Mastery: Jails (IT Mastery Book 15). 
+- [Lucas, Michael W. FreeBSD Mastery: Jails (IT Mastery Book 15)](https://mwl.io/nonfiction/os#fmjail)
 - [FreeBSD HandBook](https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/)
 - [RCTL(8)](https://www.freebsd.org/cgi/man.cgi?query=rctl&sektion=8)
 
