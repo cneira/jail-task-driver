@@ -95,7 +95,6 @@ var (
 		"Exec_created":          hclspec.NewAttr("Exec_created", "string", false),
 		"Exec_start":            hclspec.NewAttr("Exec_start", "string", false),
 		"Exec_stop":             hclspec.NewAttr("Exec_stop", "string", false),
-		"Command":               hclspec.NewAttr("Command", "string", false),
 		"Exec_poststart":        hclspec.NewAttr("Exec_poststart", "string", false),
 		"Exec_poststop":         hclspec.NewAttr("Exec_poststop", "string", false),
 		"Exec_clean":            hclspec.NewAttr("Exec_clean", "bool", false),
@@ -181,7 +180,7 @@ type Driver struct {
 // Config is the driver configuration set by the SetConfig RPC call
 type Config struct {
 }
-type Rctl  struct {
+type Rctl struct {
 	Cputime         uint `codec:"Cputime"`
 	Datasize        uint `codec:"Datasize"`
 	Coredumpsize    uint `codec:"Coredumpsize"`
@@ -285,7 +284,6 @@ type TaskConfig struct {
 	Exec_created          string `codec:"Exec_created"`
 	Exec_start            string `codec:"Exec_start"`
 	Exec_stop             string `codec:"Exec_stop"`
-	Command               string `codec:"Command"`
 	Exec_poststart        string `codec:"Exec_postart"`
 	Exec_poststop         string `codec:"Exec_poststop"`
 	Exec_clean            bool   `codec:"Exec_clean"`
