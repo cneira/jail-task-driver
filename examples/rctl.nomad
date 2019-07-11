@@ -1,4 +1,4 @@
-job "test" {
+job "rctl-test" {
   datacenters = ["dc1"]
   type        = "service"
 
@@ -15,6 +15,10 @@ job "test" {
         Path    = "/zroot/iocage/jails/myjail/root"
 	Persist  = true
 	Ip4_addr = "192.168.1.102"
+	Rctl =  {
+		Vmemoryuse = 1200000
+	}
     }
   }
+}
 }

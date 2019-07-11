@@ -17,7 +17,8 @@ Requirements
 Installation
 ------------
 
-Installation is pretty simple, install(and compile) the jail-task-driver binary and put it in [plugin_dir](https://www.nomadproject.io/docs/configuration/index.html#plugin_dir) and then add a `plugin "jail-task-driver" {}` line in your nomad config file.
+Install(and compile) the jail-task-driver binary and put it in [plugin_dir](https://www.nomadproject.io/docs/configuration/index.html#plugin_dir) and then add a `plugin "jail-task-driver" {}` line in your nomad config file.
+
 
 ```shell
 go get github.com/cneira/jail-task-driver
@@ -48,6 +49,7 @@ Examples
 ---------
 
 Basic jail 
+---------
 
 ```hcl
 job "test" {
@@ -73,6 +75,7 @@ job "test" {
 }
 ```
 Vnet jail example 
+-----------------
 
 ```hcl
 job "vnet-example" {
@@ -103,11 +106,40 @@ job "vnet-example" {
 	Exec_consolelog ="/var/tmp/vnet-example"
 	Vnet = true
 	Vnet_nic = "e0b_loghost"
-	Exec_prestart = "/usr/share/examples/jails/jib addm loghost jailether"
+	Exec_prestart = "/usr/share/examples/jails/jib addm loghost em1"
 	Exec_poststop = "/usr/share/examples/jails/jib destroy loghost "
       }
     }
   }
+}
+```
+Setting resource limits
+----------------------
+```hcl
+
+job "rctl-test" {
+  datacenters = ["dc1"]
+  type        = "service"
+
+  group "test" {
+    restart {
+      attempts = 0
+      mode     = "fail"
+    }
+
+    task "test01" {
+      driver = "jail-task-driver"
+
+      config {
+        Path    = "/zroot/iocage/jails/myjail/root"
+	Persist  = true
+	Ip4_addr = "192.168.1.102"
+	Rctl =  {
+		Vmemoryuse = 1200000
+	}
+    }
+  }
+}
 }
 ```
 ##  Demo
@@ -122,6 +154,8 @@ It's also possible to support the project on [Patreon](https://www.patreon.com/n
 
 - Lucas, Michael W. FreeBSD Mastery: Jails (IT Mastery Book 15). 
 - [FreeBSD HandBook](https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/)
+- [RCTL(8)](https://www.freebsd.org/cgi/man.cgi?query=rctl&sektion=8)
+
 
  TODO:
 -------

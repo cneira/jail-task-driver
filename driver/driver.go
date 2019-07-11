@@ -44,7 +44,7 @@ var (
 	// taskConfigSpec is the hcl specification for the driver config section of
 	// a task within a job. It is returned in the TaskConfigSchema RPC
 	taskConfigSpec = hclspec.NewObject(map[string]*hclspec.Spec{
-		"Path":                  hclspec.NewAttr("Path", "string", true),
+		"Path":                  hclspec.NewAttr("Path", "string", false),
 		"Jid":                   hclspec.NewAttr("Jid", "string", false),
 		"Ip4_addr":              hclspec.NewAttr("Ip4_addr", "string", false),
 		"Ip4_saddrsel":          hclspec.NewAttr("Ip4_saddrsel", "bool", false),
@@ -114,6 +114,33 @@ var (
 		"Mount_devfs":           hclspec.NewAttr("Mount_devfs", "bool", false),
 		"Mount_fdescfs":         hclspec.NewAttr("Mount_fdescfs", "bool", false),
 		"Depend":                hclspec.NewAttr("Depend", "string", false),
+		"Rctl": hclspec.NewBlock("Rctl", false, hclspec.NewObject(map[string]*hclspec.Spec{
+			"Cputime":         hclspec.NewAttr("Cputime", "number", false),
+			"Datasize":        hclspec.NewAttr("Datasize", "number", false),
+			"Stacksize":       hclspec.NewAttr("Stacksize", "number", false),
+			"Coredumpsize":    hclspec.NewAttr("Coredumpsize", "number", false),
+			"Memoryuse":       hclspec.NewAttr("Memoryuse", "number", false),
+			"Memorylocked":    hclspec.NewAttr("Memorylocked", "number", false),
+			"Maxproc":         hclspec.NewAttr("Maxproc", "number", false),
+			"Openfiles":       hclspec.NewAttr("Openfiles", "number", false),
+			"Vmemoryuse":      hclspec.NewAttr("Vmemoryuse", "number", false),
+			"Pseudoterminals": hclspec.NewAttr("Pseudoterminals", "number", false),
+			"Swapuse":         hclspec.NewAttr("Swapuse", "number", false),
+			"Nthr":            hclspec.NewAttr("Nthr", "number", false),
+			"Msgqqueued":      hclspec.NewAttr("Msgqqueued", "number", false),
+			"Msgqsize":        hclspec.NewAttr("Msgqsize", "number", false),
+			"Nmsgq":           hclspec.NewAttr("Nmsgq", "number", false),
+			"Nsem":            hclspec.NewAttr("Nsem", "number", false),
+			"Nsemop":          hclspec.NewAttr("Nsemop", "number", false),
+			"Nshm":            hclspec.NewAttr("Nshm", "number", false),
+			"Shmsize":         hclspec.NewAttr("Shmsize", "number", false),
+			"Wallclock":       hclspec.NewAttr("Wallclock", "number", false),
+			"Pcpu":            hclspec.NewAttr("Pcpu", "number", false),
+			"Readbps":         hclspec.NewAttr("Readbps", "number", false),
+			"Writebps":        hclspec.NewAttr("Writebps", "number", false),
+			"Readiops":        hclspec.NewAttr("Readiops", "number", false),
+			"Writeiops":       hclspec.NewAttr("Writeiops", "number", false),
+		})),
 	})
 
 	// capabilities is returned by the Capabilities RPC and indicates what
@@ -153,6 +180,56 @@ type Driver struct {
 
 // Config is the driver configuration set by the SetConfig RPC call
 type Config struct {
+}
+type Rctl  struct {
+	Cputime         uint `codec:"Cputime"`
+	Datasize        uint `codec:"Datasize"`
+	Coredumpsize    uint `codec:"Coredumpsize"`
+	Stacksize       uint `codec:"Stacksize"`
+	Memoryuse       uint `codec:"Memoryuse"`
+	Memorylocked    uint `codec:"Memorylocked"`
+	Maxproc         uint `codec:"Maxproc"`
+	Openfiles       uint `codec:"Openfiles"`
+	Vmemoryuse      uint `codec:"Vmemoryuse"`
+	Pseudoterminals uint `codec:"Pseudoterminals"`
+	Swapuse         uint `codec:"Swapuse"`
+	Nthr            uint `codec:"Nthr"`
+	Msgqqueued      uint `codec:"Msgqqueued"`
+	Msgqsize        uint `codec:"Msgqsize"`
+	Nmsgq           uint `codec:"Nmsgq"`
+	Nsemop          uint `codec:"Nsemop"`
+	Nshm            uint `codec:"Nshm"`
+	Shmsize         uint `codec:"Shmsize"`
+	Wallclock       uint `codec:"Wallclock"`
+	Pcpu            uint `codec:"Pcpu"`
+	Readbps         uint `codec:"Readbps"`
+	Writebps        uint `codec:"Writebps"`
+	Readiops        uint `codec:"Readiops"`
+	Writeiops       uint `codec:"Writeiops"`
+
+	//	Cputime         uint64
+	//	Datasize        uint64
+	//	Stacksize       uint64
+	//	Coredumpsize    uint64
+	//	Memoryuse       uint64
+	//	Memorylocked    uint64
+	//	Maxproc         uint64
+	//	Openfile        uint64
+	//	Vmemoryuse      uint64
+	//	Pseudoterminals uint64
+	//	Swapuse         uint64
+	//	Nthr            uint64
+	//	Msgqqueued      uint64
+	//	Nmsgq           uint64
+	//	Nsem            uint64
+	//	Nshm            uint64
+	//	Shmsize         uint64
+	//	Wallclock       uint64
+	//	Pcpu            uint64
+	//	Readbps         uint64
+	//	Writebps        uint64
+	//	Readiops        uint64
+	//	Writeiops       uint64
 }
 
 // TaskConfig is the driver configuration of a task within a job
@@ -220,13 +297,14 @@ type TaskConfig struct {
 	Exec_fib              string `codec:"Exec_fib"`
 	Stop_timeout          uint   `codec:"Stop_timeout"`
 	Nic                   string `codec:"Nic"`
-	Vnet_nic              string `codec:"vnet_nic"`
+	Vnet_nic              string `codec:"Vnet_nic"`
 	Ip_hostname           string `codec:"Ip_hostname"`
 	Mount                 bool   `codec:"Mount"`
 	Mount_fstab           string `codec:"Mount_fstab"`
 	Mount_devfs           bool   `codec:"Mount_devfs"`
 	Mount_fdescfs         bool   `codec:"Mount_fdescfs"`
 	Depend                string `codec:"Depend"`
+	Rctl                  Rctl   `codec:"Rctl"`
 }
 
 // TaskState is the state which is encoded in the handle returned in

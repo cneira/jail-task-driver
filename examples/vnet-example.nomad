@@ -1,4 +1,4 @@
-job "vnet-example" {
+job "vnet-example2" {
   datacenters = ["dc1"]
   type        = "service"
 
@@ -13,7 +13,6 @@ job "vnet-example" {
 
       config {
         Path    = "/zroot/iocage/jails/myjail/root"
-	Persist  = true
  	Host_hostname = "mwl.io"
 	Exec_clean = true	
 	Exec_start = "sh /etc/rc"
@@ -26,7 +25,7 @@ job "vnet-example" {
 	Exec_consolelog ="/var/tmp/vnet-example"
 	Vnet = true
 	Vnet_nic = "e0b_loghost"
-	Exec_prestart = "/usr/share/examples/jails/jib addm loghost jailether"
+	Exec_prestart = "/usr/share/examples/jails/jib addm loghost em1"
 	Exec_poststop = "/usr/share/examples/jails/jib destroy loghost "
       }
     }

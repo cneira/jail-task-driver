@@ -52,6 +52,7 @@ func isparamboolean(category string) bool {
 		"exec.system_jail_user",
 		"exec.clean",
 		"vnet",
+		"mount.devfs",
 		"persist":
 		return true
 	}
@@ -70,8 +71,23 @@ func Jailcmd(params map[string]string) error {
 			args = append(args, param)
 		}
 	}
-	if err := exec.Command("jail", args...).Run(); err != nil {
-		return fmt.Errorf("Failed creating jail args=%+v params=%+v", args, params)
+	out, err := exec.Command("jail", args...).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("Jailcmd error args=%+v err=%s out=%s", args, err, string(out))
+
+	}
+	return nil
+}
+
+func Jailrctl(jname string, params map[string]uint) error {
+	args := make([]string, 0)
+	args = append(args, "-a")
+	for k, v := range params {
+		args = append(args, "jail:"+jname+k+fmt.Sprintf("%d", v))
+		out, err := exec.Command("rctl", args...).CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("applying rctl error args=%+v err=%s out=%s", args, err, string(out))
+		}
 	}
 	return nil
 }
@@ -82,7 +98,12 @@ func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskCon
 
 	jailparams["name"] = fmt.Sprintf("%s-%s", cfg.Name, cfg.AllocID)
 	jailparams["host.hostname"] = fmt.Sprintf("%s-%s", cfg.Name, cfg.AllocID)
-	jailparams["path"] = taskConfig.Path
+
+	if len(taskConfig.Path) > 0 {
+		jailparams["path"] = taskConfig.Path
+	} else {
+		jailparams["path"] = cfg.AllocDir
+	}
 
 	if len(taskConfig.Jid) > 1 {
 		jailparams["jid"] = taskConfig.Jid
@@ -138,11 +159,15 @@ func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskCon
 	if taskConfig.Enforce_statfs > 0 {
 		jailparams["enforce_statfs"] = fmt.Sprintf("%d", taskConfig.Enforce_statfs)
 	}
+	//  A new jail must have either the persist parameter or exec.start or
+	//  command pseudo-parameter set.
 
-	if taskConfig.Persist == true {
+	if len(taskConfig.Exec_start) > 1 {
+		jailparams["exec.start"] = taskConfig.Exec_start
+	} else if len(taskConfig.Command) > 1 {
+		jailparams["command"] = taskConfig.Command
+	} else if taskConfig.Persist == true {
 		jailparams["persist"] = "true"
-	} else {
-		jailparams["nopersist"] = "true"
 	}
 
 	if len(taskConfig.Osreldate) > 1 {
@@ -233,31 +258,27 @@ func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskCon
 	}
 
 	if len(taskConfig.Exec_prestart) > 1 {
-		jailparams["exec.prestart"] = "\"" + taskConfig.Exec_prestart + "\""
+		jailparams["exec.prestart"] = taskConfig.Exec_prestart
 	}
 
 	if len(taskConfig.Exec_prestop) > 1 {
-		jailparams["exec.prestop"] = "\"" + taskConfig.Exec_prestop + "\""
+		jailparams["exec.prestop"] = taskConfig.Exec_prestop
 	}
 
 	if len(taskConfig.Exec_created) > 1 {
 		jailparams["exec.created"] = taskConfig.Exec_created
 	}
 
-	if len(taskConfig.Exec_start) > 1 {
-		jailparams["exec.start"] = "\"" + taskConfig.Exec_start + "\""
-	}
-
 	if len(taskConfig.Exec_poststart) > 1 {
-		jailparams["exec.poststart"] = "\"" + taskConfig.Exec_poststart + "\""
+		jailparams["exec.poststart"] = taskConfig.Exec_poststart
 	}
 
 	if len(taskConfig.Exec_stop) > 1 {
-		jailparams["exec.stop"] = "\"" + taskConfig.Exec_stop + "\""
+		jailparams["exec.stop"] = taskConfig.Exec_stop
 	}
 
 	if len(taskConfig.Exec_poststop) > 1 {
-		jailparams["exec.poststop"] = "\"" + taskConfig.Exec_poststop + "\""
+		jailparams["exec.poststop"] = taskConfig.Exec_poststop
 	}
 
 	if taskConfig.Exec_clean {
@@ -296,10 +317,6 @@ func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskCon
 		jailparams["ip_hostname"] = taskConfig.Ip_hostname
 	}
 
-	if len(taskConfig.Command) > 1 {
-		jailparams["command"] = taskConfig.Command
-	}
-
 	if taskConfig.Mount {
 		jailparams["mount"] = "true"
 	}
@@ -320,12 +337,98 @@ func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskCon
 		jailparams["depend"] = taskConfig.Depend
 	}
 
+	//RCTL options
+
+	rctlm := make(map[string]uint)
+	rctl := taskConfig.Rctl
+
+	if rctl.Cputime > 0 {
+		rctlm[":cputime:deny="] = rctl.Cputime
+	}
+
+	if rctl.Stacksize > 0 {
+		rctlm[":stacksize:deny="] = rctl.Stacksize
+	}
+
+	if rctl.Coredumpsize > 0 {
+		rctlm[":coredumpsize:deny="] = rctl.Coredumpsize
+	}
+	if rctl.Memoryuse > 0 {
+		rctlm[":memoryuse:deny="] = rctl.Memoryuse
+	}
+	if rctl.Memorylocked > 0 {
+		rctlm[":memorylocked:deny="] = rctl.Memorylocked
+	}
+	if rctl.Maxproc > 0 {
+		rctlm[":maxproc:deny="] = rctl.Maxproc
+	}
+	if rctl.Openfiles > 0 {
+		rctlm[":openfile:deny="] = rctl.Openfiles
+	}
+	if rctl.Vmemoryuse > 0 {
+		rctlm[":vmemoryuse:deny="] = rctl.Vmemoryuse
+	}
+	if rctl.Pseudoterminals > 0 {
+		rctlm[":pseudote:deny="] = rctl.Pseudoterminals
+	}
+	if rctl.Swapuse > 0 {
+		rctlm[":swapuse:deny="] = rctl.Swapuse
+	}
+	if rctl.Nthr > 0 {
+		rctlm[":nthr:deny="] = rctl.Nthr
+	}
+	if rctl.Msgqqueued > 0 {
+		rctlm[":msgqqueued:deny="] = rctl.Msgqqueued
+	}
+
+	if rctl.Msgqsize > 0 {
+		rctlm[":msgqsize:deny="] = rctl.Msgqsize
+	}
+
+	if rctl.Nmsgq > 0 {
+		rctlm[":nmsg:deny="] = rctl.Nmsgq
+	}
+	if rctl.Nsemop > 0 {
+		rctlm[":nsem:deny="] = rctl.Nsemop
+	}
+	if rctl.Nshm > 0 {
+		rctlm[":nshm:deny="] = rctl.Nshm
+	}
+	if rctl.Shmsize > 0 {
+		rctlm[":shmsize:deny="] = rctl.Shmsize
+	}
+	if rctl.Wallclock > 0 {
+		rctlm[":wallclock:deny="] = rctl.Wallclock
+	}
+	if rctl.Pcpu > 0 {
+		rctlm[":pcpu:deny="] = rctl.Pcpu
+	}
+	if rctl.Readbps > 0 {
+		rctlm[":readbps:deny="] = rctl.Readbps
+	}
+	if rctl.Writebps > 0 {
+		rctlm[":writebps:deny="] = rctl.Writebps
+	}
+	if rctl.Readiops > 0 {
+		rctlm[":readiops:deny="] = rctl.Readiops
+	}
+	if rctl.Writeiops > 0 {
+		rctlm[":writeiops:deny="] = rctl.Writeiops
+	}
+
 	err := Jailcmd(jailparams)
 
 	if err != nil {
 		d.logger.Info("Error Creating Jail", "driver_initialize_container", hclog.Fmt("Params %+v", jailparams))
 		d.logger.Info("Error Creating Jail", "driver_initialize_container", hclog.Fmt("%s", err))
 		return -1, fmt.Errorf("Calling jail failed %s", err)
+	}
+
+	err = Jailrctl(jailparams["name"], rctlm)
+
+	if err != nil {
+		d.logger.Info("Error setting resource control ", "driver_initialize_container", hclog.Fmt("%s", err))
+		return -1, fmt.Errorf("Calling rctl failed %s", err)
 	}
 	return 0, nil
 }
