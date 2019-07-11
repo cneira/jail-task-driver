@@ -8,6 +8,7 @@
 package jail
 
 import (
+	"bytes"
 	"crypto/rand"
 	"fmt"
 	hclog "github.com/hashicorp/go-hclog"
@@ -15,6 +16,14 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
+)
+
+const (
+	// containerMonitorIntv is the interval at which the driver checks if the
+	// container is still running
+
+	containerMonitorIntv = 2 * time.Second
 )
 
 func simple_uuid() (string, error) {
@@ -29,7 +38,6 @@ func simple_uuid() (string, error) {
 
 func IsJailActive(jailname string) bool {
 	args := []string{"-n", "name"}
-
 	out, err := exec.Command("jls", args...).Output()
 	if err != nil {
 		return false
@@ -42,6 +50,16 @@ func IsJailActive(jailname string) bool {
 		}
 	}
 	return false
+}
+
+func WaitTillStopped(jname string) (bool, error) {
+	for {
+		if IsJailActive(jname) == true {
+			time.Sleep(containerMonitorIntv)
+		} else {
+			return true, nil
+		}
+	}
 }
 
 // These params don't take a value
@@ -72,10 +90,14 @@ func Jailcmd(params map[string]string) error {
 			args = append(args, param)
 		}
 	}
-	out, err := exec.Command("jail", args...).CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("Jailcmd error args=%+v err=%s out=%s", args, err, string(out))
+	cmd := exec.Command("jail", args...)
+	buf := &bytes.Buffer{}
+	buferr := &bytes.Buffer{}
+	cmd.Stdout = buf
+	cmd.Stderr = buferr
 
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("Jailcmd error args=%+v err=%s stdout=%s stderr=%s", args, err, buf.String(), buferr.String())
 	}
 	return nil
 }

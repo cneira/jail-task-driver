@@ -12,18 +12,11 @@ import (
 	"fmt"
 	hclog "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/nomad/plugins/drivers"
+	"os/exec"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
-	"os/exec"
-)
-
-const (
-	// containerMonitorIntv is the interval at which the driver checks if the
-	// container is still running
-
-	containerMonitorIntv = 2 * time.Second
 )
 
 type taskHandle struct {
@@ -70,6 +63,11 @@ func (h *taskHandle) run() {
 
 	for IsJailActive(containerName) {
 		time.Sleep(containerMonitorIntv)
+	}
+	_, err := WaitTillStopped(containerName)
+
+	if err != nil {
+		return
 	}
 
 	h.stateLock.Lock()
