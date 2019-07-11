@@ -13,8 +13,8 @@ import (
 	hclog "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/nomad/plugins/drivers"
 	"os/exec"
+	"path/filepath"
 	"strings"
-"path/filepath"
 )
 
 func simple_uuid() (string, error) {
@@ -165,8 +165,6 @@ func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskCon
 
 	if len(taskConfig.Exec_start) > 1 {
 		jailparams["exec.start"] = taskConfig.Exec_start
-	} else if len(taskConfig.Command) > 1 {
-		jailparams["command"] = taskConfig.Command
 	} else if taskConfig.Persist == true {
 		jailparams["persist"] = "true"
 	}

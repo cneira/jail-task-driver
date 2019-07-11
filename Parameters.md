@@ -295,12 +295,6 @@ Exec_start
              Command(s) to run in the jail environment when a jail is created.
              A typical command to run is "sh /etc/rc".
 
-Command
-             A synonym for exec.start for use when specifying a jail directly
-             on the command line.  Unlike other parameters whose value is a
-             single string, command uses the remainder of the jail command
-             line as its own arguments.
-
 Exec_poststart
              Command(s) to run in the system environment after a jail is
              created, and after any exec.start commands have completed.
