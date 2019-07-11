@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/nomad/plugins/drivers"
 	"os/exec"
 	"strings"
+"path/filepath"
 )
 
 func simple_uuid() (string, error) {
@@ -102,7 +103,7 @@ func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskCon
 	if len(taskConfig.Path) > 0 {
 		jailparams["path"] = taskConfig.Path
 	} else {
-		jailparams["path"] = cfg.AllocDir
+		jailparams["path"] = filepath.Join(cfg.AllocDir, cfg.Name)
 	}
 
 	if len(taskConfig.Jid) > 1 {
