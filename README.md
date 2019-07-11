@@ -75,7 +75,7 @@ job "test" {
 ```
 Non vnet jail
 -------------
-```
+```hcl 
 job "non-vnet" {
   datacenters = ["dc1"]
   type        = "service"
