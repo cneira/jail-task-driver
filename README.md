@@ -188,8 +188,8 @@ It's also possible to support the project on [Patreon](https://www.patreon.com/n
  TODO:
 -------
 
-* Implement exec interface
-* Implement RecoverTask interface
+* ~~Implement exec interface~~
+* ~~Implement RecoverTask interface~~
 * Test All jail options
 * Refactor to match parameters as closely as JAIL(8)
 * Create jails using docker images
