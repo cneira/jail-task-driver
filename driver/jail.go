@@ -7,6 +7,11 @@
 
 package jail
 
+//#cgo LDFLAGS: -lutil
+//#include <libutil.h>
+//#include <stdlib.h>
+import "C"
+
 import (
 	"bytes"
 	"crypto/rand"
@@ -17,6 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"unsafe"
 )
 
 const (
@@ -102,11 +108,11 @@ func Jailcmd(params map[string]string) error {
 	return nil
 }
 
-func Jailrctl(jname string, params map[string]uint) error {
+func Jailrctl(jname string, params map[string]uint64) error {
 	args := make([]string, 0)
 	args = append(args, "-a")
-	for k, v := range params {
-		args = append(args, "jail:"+jname+k+fmt.Sprintf("%d", v))
+	for k, _ := range params {
+		args = append(args, "jail:"+jname+k)
 		out, err := exec.Command("rctl", args...).CombinedOutput()
 		if err != nil {
 			return fmt.Errorf("applying rctl error args=%+v err=%s out=%s", args, err, string(out))
@@ -360,81 +366,329 @@ func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskCon
 
 	//RCTL options
 
-	rctlm := make(map[string]uint)
+	rctlm := make(map[string]uint64)
 	rctl := taskConfig.Rctl
+	var amnt C.uint64_t
 
-	if rctl.Cputime > 0 {
-		rctlm[":cputime:deny="] = rctl.Cputime
-	}
-
-	if rctl.Stacksize > 0 {
-		rctlm[":stacksize:deny="] = rctl.Stacksize
-	}
-
-	if rctl.Coredumpsize > 0 {
-		rctlm[":coredumpsize:deny="] = rctl.Coredumpsize
-	}
-	if rctl.Memoryuse > 0 {
-		rctlm[":memoryuse:deny="] = rctl.Memoryuse
-	}
-	if rctl.Memorylocked > 0 {
-		rctlm[":memorylocked:deny="] = rctl.Memorylocked
-	}
-	if rctl.Maxproc > 0 {
-		rctlm[":maxproc:deny="] = rctl.Maxproc
-	}
-	if rctl.Openfiles > 0 {
-		rctlm[":openfile:deny="] = rctl.Openfiles
-	}
-	if rctl.Vmemoryuse > 0 {
-		rctlm[":vmemoryuse:deny="] = rctl.Vmemoryuse
-	}
-	if rctl.Pseudoterminals > 0 {
-		rctlm[":pseudote:deny="] = rctl.Pseudoterminals
-	}
-	if rctl.Swapuse > 0 {
-		rctlm[":swapuse:deny="] = rctl.Swapuse
-	}
-	if rctl.Nthr > 0 {
-		rctlm[":nthr:deny="] = rctl.Nthr
-	}
-	if rctl.Msgqqueued > 0 {
-		rctlm[":msgqqueued:deny="] = rctl.Msgqqueued
+	if len(rctl.Cputime.Amount) > 0 {
+		cs := C.CString(rctl.Cputime.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Cputime is invalid %s")
+		}
+		if len(rctl.Cputime.Per) > 0 {
+			rctlm[":cputime:"+rctl.Cputime.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt)) + "/" +  rctl.Cputime.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":cputime:"+rctl.Cputime.Action+"="] = (uint64)(amnt)
+		}
 	}
 
-	if rctl.Msgqsize > 0 {
-		rctlm[":msgqsize:deny="] = rctl.Msgqsize
+	if len(rctl.Stacksize.Amount) > 0 {
+		cs := C.CString(rctl.Stacksize.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Stacksize is invalid %s")
+		}
+		if len(rctl.Stacksize.Per) > 0 {
+			rctlm[":stacksize:"+rctl.Stacksize.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt)) + "/"+rctl.Stacksize.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":stacksize:"+rctl.Stacksize.Action+"="] = (uint64)(amnt)
+		}
 	}
 
-	if rctl.Nmsgq > 0 {
-		rctlm[":nmsg:deny="] = rctl.Nmsgq
+	if len(rctl.Coredumpsize.Amount) > 0 {
+		cs := C.CString(rctl.Stacksize.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Coredumpsize is invalid %s")
+		}
+		if len(rctl.Coredumpsize.Per) > 0 {
+			rctlm[":coredumpsize:"+rctl.Coredumpsize.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt)) + "/"+ rctl.Coredumpsize.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":coredumpsize:"+rctl.Coredumpsize.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt)) ] = (uint64)(amnt)
+		}
 	}
-	if rctl.Nsemop > 0 {
-		rctlm[":nsem:deny="] = rctl.Nsemop
+
+	if len(rctl.Memoryuse.Amount) > 0 {
+		cs := C.CString(rctl.Memoryuse.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Memoryuse is invalid")
+		}
+		if len(rctl.Memoryuse.Per) > 0 {
+			rctlm[":memoryuse:"+rctl.Memoryuse.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt)) + "/"+rctl.Memoryuse.Per+"="] = (uint64)(amnt)
+		} else {
+			rctlm[":memoryuse:"+rctl.Memoryuse.Action+"="+ fmt.Sprintf("%d",(uint64)(amnt)) ] = (uint64)(amnt)
+		}
 	}
-	if rctl.Nshm > 0 {
-		rctlm[":nshm:deny="] = rctl.Nshm
+
+	if len(rctl.Memorylocked.Amount) > 0 {
+		cs := C.CString(rctl.Memorylocked.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Memorylocked is invalid")
+		}
+		if len(rctl.Memorylocked.Per) > 0 {
+			rctlm[":memorylocked:"+rctl.Memorylocked.Action+ "=" + fmt.Sprintf("%d",(uint64)(amnt)) + "/"+rctl.Memorylocked.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":memorylocked:"+rctl.Memorylocked.Action+"="+ fmt.Sprintf("%d",(uint64)(amnt)) ] = (uint64)(amnt)
+		}
 	}
-	if rctl.Shmsize > 0 {
-		rctlm[":shmsize:deny="] = rctl.Shmsize
+
+	if len(rctl.Maxproc.Amount) > 0 {
+		cs := C.CString(rctl.Maxproc.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Maxproc is invalid")
+		}
+		if len(rctl.Maxproc.Per) > 0 {
+			rctlm[":maxproc:"+rctl.Maxproc.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt)) + "/" +  rctl.Maxproc.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":maxproc:"+rctl.Maxproc.Action+"="+ fmt.Sprintf("%d",(uint64)(amnt)) ] = (uint64)(amnt)
+		}
 	}
-	if rctl.Wallclock > 0 {
-		rctlm[":wallclock:deny="] = rctl.Wallclock
+
+	if len(rctl.Openfiles.Amount) > 0 {
+		cs := C.CString(rctl.Openfiles.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Openfiles is invalid")
+		}
+		if len(rctl.Openfiles.Per) > 0 {
+			rctlm[":openfiles:"+rctl.Openfiles.Action+"=" +  fmt.Sprintf("%d",(uint64)(amnt))+ "/"+rctl.Openfiles.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":openfiles:"+rctl.Openfiles.Action+"="+ fmt.Sprintf("%d",(uint64)(amnt)) ] = (uint64)(amnt)
+		}
 	}
-	if rctl.Pcpu > 0 {
-		rctlm[":pcpu:deny="] = rctl.Pcpu
+	if len(rctl.Vmemoryuse.Amount) > 0 {
+		cs := C.CString(rctl.Vmemoryuse.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Vmemoryuse is invalid")
+		}
+		if len(rctl.Vmemoryuse.Per) > 0 {
+			rctlm[":vmemoryuse:"+rctl.Vmemoryuse.Action+"=" +  fmt.Sprintf("%d",(uint64)(amnt))+"/"+rctl.Vmemoryuse.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":vmemoryuse:"+rctl.Vmemoryuse.Action+"="+  fmt.Sprintf("%d",(uint64)(amnt))] = (uint64)(amnt)
+		}
 	}
-	if rctl.Readbps > 0 {
-		rctlm[":readbps:deny="] = rctl.Readbps
+
+	if len(rctl.Pseudoterminals.Amount) > 0 {
+		cs := C.CString(rctl.Pseudoterminals.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Pseudoterminals is invalid")
+		}
+		if len(rctl.Pseudoterminals.Per) > 0 {
+			rctlm[":pseudoterminals:"+rctl.Pseudoterminals.Action+"=" +  fmt.Sprintf("%d",(uint64)(amnt))+"/"+rctl.Pseudoterminals.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":pseudoterminals:"+rctl.Pseudoterminals.Action+"="+  fmt.Sprintf("%d",(uint64)(amnt))] = (uint64)(amnt)
+		}
+
 	}
-	if rctl.Writebps > 0 {
-		rctlm[":writebps:deny="] = rctl.Writebps
+	if len(rctl.Swapuse.Amount) > 0 {
+		cs := C.CString(rctl.Swapuse.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Swapuse is invalid")
+		}
+		if len(rctl.Swapuse.Per) > 0 {
+			rctlm[":swapuse:"+rctl.Swapuse.Action+"=" +  fmt.Sprintf("%d",(uint64)(amnt))+"/"+rctl.Swapuse.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":swapuse:"+rctl.Swapuse.Action+"="+ fmt.Sprintf("%d",(uint64)(amnt))] = (uint64)(amnt)
+		}
 	}
-	if rctl.Readiops > 0 {
-		rctlm[":readiops:deny="] = rctl.Readiops
+
+	if len(rctl.Nthr.Amount) > 0 {
+		cs := C.CString(rctl.Nthr.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Nthr is invalid")
+		}
+		if len(rctl.Nthr.Per) > 0 {
+			rctlm[":nthr:"+rctl.Nthr.Action+"=" +  fmt.Sprintf("%d",(uint64)(amnt))+"/"+rctl.Nthr.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":nthr:"+rctl.Nthr.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt))] = (uint64)(amnt)
+		}
 	}
-	if rctl.Writeiops > 0 {
-		rctlm[":writeiops:deny="] = rctl.Writeiops
+
+	if len(rctl.Msgqqueued.Amount) > 0 {
+		cs := C.CString(rctl.Msgqqueued.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Msgqqueued is invalid")
+		}
+		if len(rctl.Msgqqueued.Per) > 0 {
+			rctlm[":msgqqueued:"+rctl.Msgqqueued.Action+"=" +  fmt.Sprintf("%d",(uint64)(amnt))+"/"+rctl.Msgqqueued.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":msgqqueued:"+rctl.Msgqqueued.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt))] = (uint64)(amnt)
+		}
+	}
+
+	if len(rctl.Msgqsize.Amount) > 0 {
+		cs := C.CString(rctl.Msgqsize.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Msgqsize is invalid")
+		}
+		if len(rctl.Msgqsize.Per) > 0 {
+			rctlm[":msgqsize:"+rctl.Msgqsize.Action+ "=" + fmt.Sprintf("%d",(uint64)(amnt)) + "/"+rctl.Msgqsize.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":msgqsize:"+rctl.Msgqsize.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt))] = (uint64)(amnt)
+		}
+	}
+
+	if len(rctl.Nmsgq.Amount) > 0 {
+		cs := C.CString(rctl.Nmsgq.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Nmsgq is invalid")
+		}
+		if len(rctl.Nmsgq.Per) > 0 {
+			rctlm[":nmsgq:"+rctl.Nmsgq.Action+ "=" + fmt.Sprintf("%d",(uint64)(amnt)) + "/"+rctl.Nmsgq.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":nmsgq:"+rctl.Nmsgq.Action+"="+ fmt.Sprintf("%d",(uint64)(amnt)) ] = (uint64)(amnt)
+		}
+	}
+
+	if len(rctl.Nsemop.Amount) > 0 {
+		cs := C.CString(rctl.Nsemop.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Nsemop is invalid")
+		}
+		if len(rctl.Nsemop.Per) > 0 {
+			rctlm[":nsemop:"+rctl.Nsemop.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt)) +  "/"+rctl.Nsemop.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":nsemop:"+rctl.Nsemop.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt)) ] = (uint64)(amnt)
+		}
+
+	}
+	if len(rctl.Nshm.Amount) > 0 {
+		cs := C.CString(rctl.Nshm.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Nshm is invalid")
+		}
+		if len(rctl.Nshm.Per) > 0 {
+			rctlm[":nshm:"+rctl.Nshm.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt)) + "/"+rctl.Nshm.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":nshm:"+rctl.Nshm.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt)) ] = (uint64)(amnt)
+		}
+	}
+	if len(rctl.Shmsize.Amount) > 0 {
+		cs := C.CString(rctl.Shmsize.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Shmsize is invalid")
+		}
+		if len(rctl.Shmsize.Per) > 0 {
+			rctlm[":shmsize:"+rctl.Shmsize.Action+ "=" + fmt.Sprintf("%d",(uint64)(amnt)) +"/"+rctl.Shmsize.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":shmsize:"+rctl.Shmsize.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt)) ] = (uint64)(amnt)
+		}
+	}
+
+	if len(rctl.Wallclock.Amount) > 0 {
+		cs := C.CString(rctl.Wallclock.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Wallclock is invalid")
+		}
+		if len(rctl.Wallclock.Per) > 0 {
+			rctlm[":wallclock:"+rctl.Wallclock.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt)) + "/"+rctl.Wallclock.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":wallclock:"+rctl.Wallclock.Action+"="+ fmt.Sprintf("%d",(uint64)(amnt)) ] = (uint64)(amnt)
+		}
+
+	}
+
+	if len(rctl.Pcpu.Amount) > 0 {
+		cs := C.CString(rctl.Pcpu.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Pcpu is invalid")
+		}
+		if len(rctl.Pcpu.Per) > 0 {
+			rctlm[":pcpu:"+rctl.Pcpu.Action+ "=" + fmt.Sprintf("%d",(uint64)(amnt)) +"/"+rctl.Pcpu.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":pcpu:"+rctl.Pcpu.Action+"=" +  fmt.Sprintf("%d",(uint64)(amnt)) ] = (uint64)(amnt)
+		}
+	}
+
+	if len(rctl.Readbps.Amount) > 0 {
+		cs := C.CString(rctl.Readbps.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Readbps is invalid")
+		}
+		if len(rctl.Readbps.Per) > 0 {
+			rctlm[":readbps:"+rctl.Readbps.Action+ "="+  fmt.Sprintf("%d",(uint64)(amnt)) + "/"+rctl.Readbps.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":readbps:"+rctl.Readbps.Action+"="+  fmt.Sprintf("%d",(uint64)(amnt)) ] = (uint64)(amnt)
+		}
+	}
+
+	if len(rctl.Writebps.Amount) > 0 {
+		cs := C.CString(rctl.Writebps.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Writebps is invalid")
+		}
+		if len(rctl.Writebps.Per) > 0 {
+			rctlm[":writebps:"+rctl.Writebps.Action+"="+ fmt.Sprintf("%d",(uint64)(amnt)) +"/"+rctl.Writebps.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":writebps:"+rctl.Writebps.Action+"=" +   fmt.Sprintf("%d",(uint64)(amnt)) ] = (uint64)(amnt)
+		}
+
+	}
+	if len(rctl.Readiops.Amount) > 0 {
+		cs := C.CString(rctl.Readiops.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Readiops is invalid")
+		}
+		if len(rctl.Readiops.Per) > 0 {
+			rctlm[":readiops:"+rctl.Readiops.Action+"="+ fmt.Sprintf("%d",(uint64)(amnt)) +"/"+rctl.Readiops.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":readiops:"+rctl.Readiops.Action+"=" + fmt.Sprintf("%d",(uint64)(amnt)) ] = (uint64)(amnt)
+		}
+	}
+	if len(rctl.Writeiops.Amount) > 0 {
+		cs := C.CString(rctl.Writeiops.Amount)
+		defer C.free(unsafe.Pointer(cs))
+		err := C.expand_number(cs, &amnt)
+		if err != 0 {
+			return -1, fmt.Errorf("Amount for Writeiops is invalid")
+		}
+		if len(rctl.Writeiops.Per) > 0 {
+			rctlm[":writeiops:"+rctl.Writeiops.Action+"="+ fmt.Sprintf("%d",(uint64)(amnt)) + "/"+rctl.Writeiops.Per] = (uint64)(amnt)
+		} else {
+			rctlm[":writeiops:"+rctl.Writeiops.Action+"="+ fmt.Sprintf("%d",(uint64)(amnt)) ] = (uint64)(amnt)
+		}
+
 	}
 
 	err := Jailcmd(jailparams)

@@ -425,14 +425,12 @@ Depend   Specify a jail (or jails) that this jail depends on.  When this
 Jail resource control parameters
 --------------------------------
 This is a verbatim copy for RCTL(8) parameters but modified for naming convention
-used in jail-task-driver, the rctl action is always deny for these parameters.
+used in jail-task-driver. 
 RACCT must be enabled first 
    
 ```
 # echo kern.racct.enable=1 >> /boot/loader.conf
 ```
-  
-   
 
 ```
 Cputime		   CPU time, in	seconds

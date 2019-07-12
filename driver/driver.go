@@ -114,31 +114,158 @@ var (
 		"Mount_fdescfs":         hclspec.NewAttr("Mount_fdescfs", "bool", false),
 		"Depend":                hclspec.NewAttr("Depend", "string", false),
 		"Rctl": hclspec.NewBlock("Rctl", false, hclspec.NewObject(map[string]*hclspec.Spec{
-			"Cputime":         hclspec.NewAttr("Cputime", "number", false),
-			"Datasize":        hclspec.NewAttr("Datasize", "number", false),
-			"Stacksize":       hclspec.NewAttr("Stacksize", "number", false),
-			"Coredumpsize":    hclspec.NewAttr("Coredumpsize", "number", false),
-			"Memoryuse":       hclspec.NewAttr("Memoryuse", "number", false),
-			"Memorylocked":    hclspec.NewAttr("Memorylocked", "number", false),
-			"Maxproc":         hclspec.NewAttr("Maxproc", "number", false),
-			"Openfiles":       hclspec.NewAttr("Openfiles", "number", false),
-			"Vmemoryuse":      hclspec.NewAttr("Vmemoryuse", "number", false),
-			"Pseudoterminals": hclspec.NewAttr("Pseudoterminals", "number", false),
-			"Swapuse":         hclspec.NewAttr("Swapuse", "number", false),
-			"Nthr":            hclspec.NewAttr("Nthr", "number", false),
-			"Msgqqueued":      hclspec.NewAttr("Msgqqueued", "number", false),
-			"Msgqsize":        hclspec.NewAttr("Msgqsize", "number", false),
-			"Nmsgq":           hclspec.NewAttr("Nmsgq", "number", false),
-			"Nsem":            hclspec.NewAttr("Nsem", "number", false),
-			"Nsemop":          hclspec.NewAttr("Nsemop", "number", false),
-			"Nshm":            hclspec.NewAttr("Nshm", "number", false),
-			"Shmsize":         hclspec.NewAttr("Shmsize", "number", false),
-			"Wallclock":       hclspec.NewAttr("Wallclock", "number", false),
-			"Pcpu":            hclspec.NewAttr("Pcpu", "number", false),
-			"Readbps":         hclspec.NewAttr("Readbps", "number", false),
-			"Writebps":        hclspec.NewAttr("Writebps", "number", false),
-			"Readiops":        hclspec.NewAttr("Readiops", "number", false),
-			"Writeiops":       hclspec.NewAttr("Writeiops", "number", false),
+			"Cputime": hclspec.NewBlock("Cputime", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+			"Datasize": hclspec.NewBlock("Datasize", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Stacksize": hclspec.NewBlock("Stacksize", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Coredumpsize": hclspec.NewBlock("Coredumpsize", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Memoryuse": hclspec.NewBlock("Memoryuse", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Memorylocked": hclspec.NewBlock("Memorylocked", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Maxproc": hclspec.NewBlock("Maxproc", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Openfiles": hclspec.NewBlock("Openfiles", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Vmemoryuse": hclspec.NewBlock("Vmemoryuse", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Pseudoterminals": hclspec.NewBlock("Pseudoterminals", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Swapuse": hclspec.NewBlock("Swapuse", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			
+			})),
+
+			"Nthr": hclspec.NewBlock("Nthr", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+		
+			})),
+
+			"Msgqqueued": hclspec.NewBlock("Msgqqueued", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+	
+			})),
+
+			"Msgqsize": hclspec.NewBlock("Msgqsize", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+
+			})),
+
+			"Nmsgq": hclspec.NewBlock("Nmsgq", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Nsem": hclspec.NewBlock("Nsem", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Nsemop": hclspec.NewBlock("Nsemop", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Nshm": hclspec.NewBlock("Nshm", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Shmsize": hclspec.NewBlock("Shmsize", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Wallclock": hclspec.NewBlock("Wallclock", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Pcpu": hclspec.NewBlock("Pcpu", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Readbps": hclspec.NewBlock("Readbps", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Writebps": hclspec.NewBlock("Writebps", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Readiops": hclspec.NewBlock("Readiops", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
+
+			"Writeiops": hclspec.NewBlock("Writeiops", false, hclspec.NewObject(map[string]*hclspec.Spec{
+				"Action": hclspec.NewAttr("Action", "string", true),
+				"Amount": hclspec.NewAttr("Amount", "string", true),
+				"Per": hclspec.NewAttr("Per", "string", false),
+			})),
 		})),
 	})
 
@@ -180,55 +307,38 @@ type Driver struct {
 // Config is the driver configuration set by the SetConfig RPC call
 type Config struct {
 }
-type Rctl struct {
-	Cputime         uint `codec:"Cputime"`
-	Datasize        uint `codec:"Datasize"`
-	Coredumpsize    uint `codec:"Coredumpsize"`
-	Stacksize       uint `codec:"Stacksize"`
-	Memoryuse       uint `codec:"Memoryuse"`
-	Memorylocked    uint `codec:"Memorylocked"`
-	Maxproc         uint `codec:"Maxproc"`
-	Openfiles       uint `codec:"Openfiles"`
-	Vmemoryuse      uint `codec:"Vmemoryuse"`
-	Pseudoterminals uint `codec:"Pseudoterminals"`
-	Swapuse         uint `codec:"Swapuse"`
-	Nthr            uint `codec:"Nthr"`
-	Msgqqueued      uint `codec:"Msgqqueued"`
-	Msgqsize        uint `codec:"Msgqsize"`
-	Nmsgq           uint `codec:"Nmsgq"`
-	Nsemop          uint `codec:"Nsemop"`
-	Nshm            uint `codec:"Nshm"`
-	Shmsize         uint `codec:"Shmsize"`
-	Wallclock       uint `codec:"Wallclock"`
-	Pcpu            uint `codec:"Pcpu"`
-	Readbps         uint `codec:"Readbps"`
-	Writebps        uint `codec:"Writebps"`
-	Readiops        uint `codec:"Readiops"`
-	Writeiops       uint `codec:"Writeiops"`
 
-	//	Cputime         uint64
-	//	Datasize        uint64
-	//	Stacksize       uint64
-	//	Coredumpsize    uint64
-	//	Memoryuse       uint64
-	//	Memorylocked    uint64
-	//	Maxproc         uint64
-	//	Openfile        uint64
-	//	Vmemoryuse      uint64
-	//	Pseudoterminals uint64
-	//	Swapuse         uint64
-	//	Nthr            uint64
-	//	Msgqqueued      uint64
-	//	Nmsgq           uint64
-	//	Nsem            uint64
-	//	Nshm            uint64
-	//	Shmsize         uint64
-	//	Wallclock       uint64
-	//	Pcpu            uint64
-	//	Readbps         uint64
-	//	Writebps        uint64
-	//	Readiops        uint64
-	//	Writeiops       uint64
+type RctlOpts struct {
+	Action string `codec:"Action"`
+	Amount string `codec:"Amount"`
+	Per string `codec:"Per"`
+}
+
+type Rctl struct {
+	Cputime         RctlOpts `codec:"Cputime"`
+	Datasize        RctlOpts `codec:"Datasize"`
+	Coredumpsize    RctlOpts `codec:"Coredumpsize"`
+	Stacksize       RctlOpts `codec:"Stacksize"`
+	Memoryuse       RctlOpts `codec:"Memoryuse"`
+	Memorylocked    RctlOpts `codec:"Memorylocked"`
+	Maxproc         RctlOpts `codec:"Maxproc"`
+	Openfiles       RctlOpts `codec:"Openfiles"`
+	Vmemoryuse      RctlOpts `codec:"Vmemoryuse"`
+	Pseudoterminals RctlOpts `codec:"Pseudoterminals"`
+	Swapuse         RctlOpts `codec:"Swapuse"`
+	Nthr            RctlOpts `codec:"Nthr"`
+	Msgqqueued      RctlOpts `codec:"Msgqqueued"`
+	Msgqsize        RctlOpts `codec:"Msgqsize"`
+	Nmsgq           RctlOpts `codec:"Nmsgq"`
+	Nsemop          RctlOpts `codec:"Nsemop"`
+	Nshm            RctlOpts `codec:"Nshm"`
+	Shmsize         RctlOpts `codec:"Shmsize"`
+	Wallclock       RctlOpts `codec:"Wallclock"`
+	Pcpu            RctlOpts `codec:"Pcpu"`
+	Readbps         RctlOpts `codec:"Readbps"`
+	Writebps        RctlOpts `codec:"Writebps"`
+	Readiops        RctlOpts `codec:"Readiops"`
+	Writeiops       RctlOpts `codec:"Writeiops"`
 }
 
 // TaskConfig is the driver configuration of a task within a job
