@@ -146,7 +146,7 @@ var (
 	// optional features this driver supports
 	capabilities = &drivers.Capabilities{
 		SendSignals: false,
-		Exec:        false,
+		Exec:        true,
 		FSIsolation: drivers.FSIsolationImage,
 	}
 )
@@ -409,9 +409,21 @@ func (d *Driver) RecoverTask(handle *drivers.TaskHandle) error {
 		return nil
 	}
 
+	var driverConfig TaskConfig
+	if err := handle.Config.DecodeDriverConfig(&driverConfig); err != nil {
+		return fmt.Errorf("failed to decode driver config: %v", err)
+	}
+
 	var taskState TaskState
 	if err := handle.GetDriverState(&taskState); err != nil {
 		return fmt.Errorf("failed to decode task state from handle: %v", err)
+	}
+
+	_, err := d.initializeContainer(handle.Config, driverConfig)
+	if err != nil {
+		d.logger.Info("Error RecoverTask k", "driver_cfg", hclog.Fmt("%+v", err))
+		return fmt.Errorf("task with ID %q failed", handle.Config.ID)
+
 	}
 
 	h := &taskHandle{
@@ -570,5 +582,18 @@ func (d *Driver) SignalTask(taskID string, signal string) error {
 }
 
 func (d *Driver) ExecTask(taskID string, cmd []string, timeout time.Duration) (*drivers.ExecTaskResult, error) {
-	return nil, fmt.Errorf("Jail driver does not support exec")
+
+	if len(cmd) == 0 {
+		return nil, fmt.Errorf("cmd is required, but was empty")
+	}
+	handle, ok := d.tasks.Get(taskID)
+	if !ok {
+		return nil, drivers.ErrTaskNotFound
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	return handle.Exec(ctx, cmd[0], cmd[1:])
+
 }

@@ -462,3 +462,12 @@ Writebps	   filesystem writes, in bytes per second
 Readiops	   filesystem reads, in	operations per second
 Writeiops	   filesystem writes, in operations per	second
 ```
+
+## References
+
+- [RCTL(8)](https://www.freebsd.org/cgi/man.cgi?query=rctl&sektion=8)
+- [JAIL(8)](https://www.freebsd.org/cgi/man.cgi?query=jail&sektion=8)
+
+## Support
+
+It's also possible to support the project on [Patreon](https://www.patreon.com/neirac)

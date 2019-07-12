@@ -128,7 +128,7 @@ func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskCon
 		jailparams["path"] = filepath.Join(cfg.AllocDir, cfg.Name)
 	}
 
-	if len(taskConfig.Jid) > 1 {
+	if len(taskConfig.Jid) > 0 {
 		jailparams["jid"] = taskConfig.Jid
 	}
 

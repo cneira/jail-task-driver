@@ -8,6 +8,7 @@
 package jail
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	hclog "github.com/hashicorp/go-hclog"
@@ -100,6 +101,35 @@ func keysToVal(line string) (string, uint64, error) {
 	key := tokens[0]
 	val, err := strconv.ParseUint(tokens[1], 10, 64)
 	return key, val, err
+}
+
+func (h *taskHandle) Exec(ctx context.Context, cmd string, args []string) (*drivers.ExecTaskResult, error) {
+	containerName := fmt.Sprintf("%s-%s", h.taskConfig.Name, h.taskConfig.AllocID)
+	fullCmd := make([]string, len(args)+1)
+	fullCmd[0] = containerName
+	fullCmd[1] = cmd
+	copy(fullCmd[2:], args)
+	execResult := &drivers.ExecTaskResult{ExitResult: &drivers.ExitResult{}}
+	bufout := &bytes.Buffer{}
+	buferr := &bytes.Buffer{}
+
+	jexec := exec.Command("jexec", fullCmd...)
+	jexec.Stdout = bufout
+	jexec.Stderr = buferr
+	if err := jexec.Run(); err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok {
+			execResult.Stdout = bufout.Bytes()
+			execResult.Stderr = buferr.Bytes()
+			execResult.ExitResult.ExitCode = exitError.ExitCode()
+			return nil, fmt.Errorf("Exectask error fullcmd=%s stderr=%s stdout=%s stderr=%s", args, err, bufout.String(), buferr.String())
+		}
+	}
+
+	execResult.Stdout = bufout.Bytes()
+	execResult.Stderr = buferr.Bytes()
+	execResult.ExitResult.ExitCode = 0
+
+	return execResult, nil
 }
 
 // shutdown shuts down the container, with `timeout` grace period
