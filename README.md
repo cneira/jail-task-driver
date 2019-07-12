@@ -175,9 +175,10 @@ job "rctl-test" {
 
 ## Support
 
-[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/J3J4YM9U)
+[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/J3J4YM9U)  
+      
 It's also possible to support the project on [Patreon](https://www.patreon.com/neirac)  
-
+    
 ## References
 
 - [Lucas, Michael W. FreeBSD Mastery: Jails (IT Mastery Book 15)](https://mwl.io/nonfiction/os#fmjail)
