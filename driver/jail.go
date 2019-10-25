@@ -593,12 +593,6 @@ func (d *Driver) initializeContainer(cfg *drivers.TaskConfig, taskConfig TaskCon
 				return -1, fmt.Errorf("docker pull failed %s", err)
 			}
 
-			args := []string{"xvfz", path + ".tar.gz", "-C", jailparams["path"]}
-
-			if err := exec.Command("gtar", args...).Run(); err != nil {
-				return -1, fmt.Errorf("error uncompressing image :%s", err, args)
-			}
-
 			jailparams["exec.prestart"] = "\"" + "mount -t linsysfs linsysfs " + jailparams["path"] + "/sys" +
 				"; " + "mount -t linprocfs linprocfs " + jailparams["path"] + "/proc" + "\""
 			jailparams["exec.stop"] = "\"" + "umount " + jailparams["path"] + "/sys" + "; " + "umount  " +
